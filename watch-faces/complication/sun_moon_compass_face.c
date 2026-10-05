@@ -38,7 +38,7 @@ static const char  TR1[] = "SL";  // Sun, Luna
 static const float LAT  = 50.08f;
 static const float LON  = 8.16f;
 
-static const uint8_t UPDATE_INTERVAL_S = 60;
+static const uint8_t UPDATE_INTERVAL_T = 60;
 
 static int sun_compass(int, int, int, int, int, int, float, float);
 static int moon_compass(int, int, int, int, int, int, float, float);
@@ -86,20 +86,20 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
             watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
 
-            ctr = UPDATE_INTERVAL_S-1;
+            ctr = UPDATE_INTERVAL_T-1;
             sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
             moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             break;
         case EVENT_TICK:
             ctr = ctr - 1;
-            if(ctr % UPDATE_INTERVAL_S == 0) {
+            if(ctr % UPDATE_INTERVAL_T == 0) {
                 sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
                 moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
             }
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
-            if(ctr % UPDATE_INTERVAL_S == 0) {
-                ctr = UPDATE_INTERVAL_S;
+            if(ctr % UPDATE_INTERVAL_T == 0) {
+                ctr = UPDATE_INTERVAL_T;
             }
             break;
         case EVENT_LOW_ENERGY_UPDATE:
