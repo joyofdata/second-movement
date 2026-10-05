@@ -85,17 +85,17 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
         case EVENT_ACTIVATE:
             watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
             watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
-            
+
             ctr = UPDATE_INTERVAL_S-1;
-            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
-            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
+            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             break;
         case EVENT_TICK:
             ctr = ctr - 1;
             if(ctr % UPDATE_INTERVAL_S == 0) {
-                sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
-                moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
+                sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+                moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
             }
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             if(ctr % UPDATE_INTERVAL_S == 0) {
@@ -103,9 +103,9 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             }
             break;
         case EVENT_LOW_ENERGY_UPDATE:
-            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
-            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
-            _sun_moon_compass_display(sun_pos, moon_pos, 0);
+            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+            _sun_moon_compass_display(sun_pos, moon_pos, -1);
             break;
         default:
             return movement_default_loop_handler(event);
