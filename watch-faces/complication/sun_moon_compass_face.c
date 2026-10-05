@@ -40,16 +40,15 @@ static const float LON  = 8.16f;
 
 static const uint8_t UPDATE_INTERVAL_S = 60;
 
-int ctr = UPDATE_INTERVAL_S-1;
-int sun_pos;
-int moon_pos;
+static int sun_compass(int, int, int, int, int, int, float, float);
+static int moon_compass(int, int, int, int, int, int, float, float);
+
+static int ctr;
+static int sun_pos;
+static int moon_pos;
 
 static void _sun_moon_compass_display(int sun_pos, int moon_pos, int ctr) {
     char buf[12];
-
-    watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
-
-    watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
 
     snprintf(buf, sizeof(buf), "%2d", (int)lroundf(sun_pos/6.0f));
     watch_display_text(WATCH_POSITION_HOURS, buf);
@@ -84,6 +83,10 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
+            watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
+            watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
+            
+            ctr = UPDATE_INTERVAL_S-1;
             sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
             moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
@@ -98,6 +101,11 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             if(ctr % UPDATE_INTERVAL_S == 0) {
                 ctr = UPDATE_INTERVAL_S;
             }
+            break;
+        case EVENT_LOW_ENERGY_UPDATE:
+            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
+            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year, now.unit.month, now.unit.day, LAT, LON);
+            _sun_moon_compass_display(sun_pos, moon_pos, 0);
             break;
         default:
             return movement_default_loop_handler(event);

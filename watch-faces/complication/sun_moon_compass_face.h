@@ -42,8 +42,7 @@ void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr);
 void sun_moon_compass_face_activate(void *context);
 bool sun_moon_compass_face_loop(movement_event_t event, void *context);
 void sun_moon_compass_face_resign(void *context);
-static int sun_compass(int, int, int, int, int, int, float, float);
-static int moon_compass(int, int, int, int, int, int, float, float);
+
 
 #define sun_moon_compass_face ((const watch_face_t){ \
     sun_moon_compass_face_setup, \
