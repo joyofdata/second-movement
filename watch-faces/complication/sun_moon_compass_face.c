@@ -94,12 +94,16 @@ void sun_moon_compass_face_activate(void *context) {
     watch_set_colon();
 }
 
+static void _update() {
+    watch_date_time_t now = movement_get_utc_date_time();
+
+    sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+    moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+}
+
 bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
     sun_moon_compass_state_t *state = (sun_moon_compass_state_t *)context;
     (void) context;
-
-    watch_date_time_t now = movement_get_utc_date_time();
-
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
@@ -107,15 +111,13 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
 
             ctr = UPDATE_INTERVAL_T-1;
-            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
-            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+            _update();
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             break;
         case EVENT_TICK:
             ctr = ctr - 1;
             if(ctr % UPDATE_INTERVAL_T == 0) {
-                sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
-                moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+                _update();
             }
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             if(ctr % UPDATE_INTERVAL_T == 0) {
@@ -123,8 +125,7 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             }
             break;
         case EVENT_LOW_ENERGY_UPDATE:
-            sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
-            moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+            _update();
             _sun_moon_compass_display(sun_pos, moon_pos, -1);
             break;
         default:
