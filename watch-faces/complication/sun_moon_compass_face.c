@@ -50,10 +50,10 @@ static int moon_pos;
 static void _sun_moon_compass_display(int sun_pos, int moon_pos, int ctr) {
     char buf[12];
 
-    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(sun_pos/6.0f));
+    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(sun_pos / 6.0f) % 60);
     watch_display_text(WATCH_POSITION_HOURS, buf);
 
-    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(moon_pos/6.0f));
+    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(moon_pos / 6.0f) % 60);
     watch_display_text(WATCH_POSITION_MINUTES, buf);
 
     snprintf(buf, sizeof(buf), "%02d", ctr);
