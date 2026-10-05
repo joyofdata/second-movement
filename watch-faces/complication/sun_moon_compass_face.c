@@ -37,6 +37,7 @@ static const char  TR0[] = "2L"; // 2un, Luna
 static const char  TL1[] = "CPS"; // ComPasS
 static const char  TR1[] = "SL";  // Sun, Luna
 
+// set LAT,LON to NAN if they should be sourced from location.u32
 static const float LAT  = 50.08f;
 static const float LON  = 8.16f;
 
@@ -45,39 +46,42 @@ static const uint8_t UPDATE_INTERVAL_T = 60;
 static int sun_compass(int, int, int, int, int, int, float, float);
 static int moon_compass(int, int, int, int, int, int, float, float);
 
-static int ctr;
-static int sun_pos;
-static int moon_pos;
 
 // Loads coordinates from location.u32 if they are set there. 
 // For setting coordinates to that file use sunrise/sunset face.
-static void load_location(float *latitude, float *longitude)
+static void load_location(sun_moon_compass_state_t *state)
 {
-    *latitude = LAT;
-    *longitude = LON;
+    if(!isnan(LAT) && !isnan(LON)) {
+        state->lat = LAT;
+        state->lon = LON;
+    } else {
+        movement_location_t location = {0};
 
-    movement_location_t location = {0};
-
-    if (filesystem_read_file("location.u32",
-                             (char *)&location.reg,
-                             sizeof(location))
-        && location.reg != 0) {
-        *latitude = location.bit.latitude / 100.0f;
-        *longitude = location.bit.longitude / 100.0f;
+        if (filesystem_read_file("location.u32", (char *)&location.reg, sizeof(location))
+            && location.reg != 0) {
+            state->lat = location.bit.latitude / 100.0f;
+            state->lon = location.bit.longitude / 100.0f;
+        } else {
+            printf("ERROR: No coords specified.");
+        }
     }
 }
 
-static void _sun_moon_compass_display(int sun_pos, int moon_pos, int ctr) {
+static void _display(const sun_moon_compass_state_t *state) {
     char buf[12];
 
-    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(sun_pos / 6.0f) % 60);
+    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(state->sun_pos / 6.0f) % 60);
     watch_display_text(WATCH_POSITION_HOURS, buf);
 
-    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(moon_pos / 6.0f) % 60);
+    snprintf(buf, sizeof(buf), "%2d", (int)lroundf(state->moon_pos / 6.0f) % 60);
     watch_display_text(WATCH_POSITION_MINUTES, buf);
 
-    snprintf(buf, sizeof(buf), "%02d", ctr);
-    watch_display_text(WATCH_POSITION_SECONDS, (ctr >= 0) ? buf : " ");
+    if (state->ctr < 0) {
+        watch_display_text(WATCH_POSITION_SECONDS, "  ");
+    } else {
+        snprintf(buf, sizeof(buf), "%02d", state->ctr);
+        watch_display_text(WATCH_POSITION_SECONDS, buf);
+    }
 }
 
 void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr) {
@@ -89,39 +93,40 @@ void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr) 
 }
 
 void sun_moon_compass_face_activate(void *context) {
-    sun_moon_compass_state_t *state = (sun_moon_compass_state_t *)context;
     (void) context;
     watch_set_colon();
 }
 
-static void _update() {
+static void _update(sun_moon_compass_state_t *state) {
     watch_date_time_t now = movement_get_utc_date_time();
+    int year = now.unit.year + WATCH_RTC_REFERENCE_YEAR;
 
-    sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
-    moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, now.unit.year + WATCH_RTC_REFERENCE_YEAR, now.unit.month, now.unit.day, LAT, LON);
+    state->sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, 
+        year, now.unit.month, now.unit.day, state->lat, state->lon);
+    state->moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, 
+        year, now.unit.month, now.unit.day, state->lat, state->lon);
 }
 
 bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
     sun_moon_compass_state_t *state = (sun_moon_compass_state_t *)context;
-    (void) context;
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
             watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
             watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
 
-            ctr = UPDATE_INTERVAL_T-1;
-            _update();
-            _sun_moon_compass_display(sun_pos, moon_pos, ctr);
+            state->ctr = UPDATE_INTERVAL_T-1;
+            _update(state);
+            _display(state);
             break;
         case EVENT_TICK:
-            ctr = (ctr == 0) ? UPDATE_INTERVAL_T - 1 : ctr - 1;
-            if (ctr == 0) _update();
-            _sun_moon_compass_display(sun_pos, moon_pos, ctr);
+            state->ctr = (state->ctr == 0) ? UPDATE_INTERVAL_T - 1 : state->ctr - 1;
+            if (state->ctr == 0) _update(state);
+            _display(state);
             break;
         case EVENT_LOW_ENERGY_UPDATE:
-            _update();
-            _sun_moon_compass_display(sun_pos, moon_pos, -1);
+            _update(state);
+            _display(state);
             break;
         default:
             return movement_default_loop_handler(event);
