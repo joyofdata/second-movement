@@ -77,7 +77,7 @@ static void _sun_moon_compass_display(int sun_pos, int moon_pos, int ctr) {
     watch_display_text(WATCH_POSITION_MINUTES, buf);
 
     snprintf(buf, sizeof(buf), "%02d", ctr);
-    watch_display_text(WATCH_POSITION_SECONDS, buf);
+    watch_display_text(WATCH_POSITION_SECONDS, (ctr >= 0) ? buf : " ");
 }
 
 void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr) {
@@ -121,7 +121,7 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             break;
         case EVENT_LOW_ENERGY_UPDATE:
             _update();
-            _sun_moon_compass_display(sun_pos, moon_pos, " ");
+            _sun_moon_compass_display(sun_pos, moon_pos, -1);
             break;
         default:
             return movement_default_loop_handler(event);
