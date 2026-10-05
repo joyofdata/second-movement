@@ -27,14 +27,27 @@
 #include "movement.h"
 
 /*
- * A DESCRIPTION OF YOUR WATCH FACE
+ * Sun and Moon compass.
  *
- * and a description of how use it
+ * Uses UTC date/time and configured latitude/longitude to estimate the
+ * direction of North relative to the Sun and Moon.
  *
+ * The hours field shows the Sun-based result; the minutes field shows
+ * the Moon-based result. Each value is a dial position from 00 to 59,
+ * increasing clockwise, with one position representing 6 degrees.
+ *
+ * Hold the watch level and point its 12 o'clock direction towards the
+ * Sun or Moon. The corresponding displayed dial position indicates North.
+ * This is a calculated direction aid, not a magnetic compass.
+ *
+ * Positions are recalculated on activation, periodically while active,
+ * and on low-energy updates. The seconds field shows the active update
+ * countdown, or 00 during low-energy updates.
+ *
+ * Set LAT and LON in the source or via sunrise/sunset face for your location.
  */
 
 typedef struct {
-    // Anything you need to keep track of, put it here!
     uint8_t unused;
 } sun_moon_compass_state_t;
 

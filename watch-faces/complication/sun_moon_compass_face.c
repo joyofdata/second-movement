@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+#include "filesystem.h"
 #include "sun_moon_compass_face.h"
 
 // classic display
@@ -46,6 +48,24 @@ static int moon_compass(int, int, int, int, int, int, float, float);
 static int ctr;
 static int sun_pos;
 static int moon_pos;
+
+// Loads coordinates from location.u32 if they are set there. 
+// For setting coordinates to that file use sunrise/sunset face.
+static void load_location(float *latitude, float *longitude)
+{
+    *latitude = LAT;
+    *longitude = LON;
+
+    movement_location_t location = {0};
+
+    if (filesystem_read_file("location.u32",
+                             (char *)&location.reg,
+                             sizeof(location))
+        && location.reg != 0) {
+        *latitude = location.bit.latitude / 100.0f;
+        *longitude = location.bit.longitude / 100.0f;
+    }
+}
 
 static void _sun_moon_compass_display(int sun_pos, int moon_pos, int ctr) {
     char buf[12];
