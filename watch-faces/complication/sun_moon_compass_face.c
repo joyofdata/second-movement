@@ -115,18 +115,13 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
             break;
         case EVENT_TICK:
-            ctr = ctr - 1;
-            if(ctr % UPDATE_INTERVAL_T == 0) {
-                _update();
-            }
+            ctr = (ctr == 0) ? UPDATE_INTERVAL_T - 1 : ctr - 1;
+            if (ctr == 0) _update();
             _sun_moon_compass_display(sun_pos, moon_pos, ctr);
-            if(ctr % UPDATE_INTERVAL_T == 0) {
-                ctr = UPDATE_INTERVAL_T;
-            }
             break;
         case EVENT_LOW_ENERGY_UPDATE:
             _update();
-            _sun_moon_compass_display(sun_pos, moon_pos, -1);
+            _sun_moon_compass_display(sun_pos, moon_pos, " ");
             break;
         default:
             return movement_default_loop_handler(event);
