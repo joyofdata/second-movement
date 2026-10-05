@@ -163,7 +163,9 @@ static double cosd(double d) { return cos(d * DEG2RAD); }
  * longitude: degrees, east positive. latitude: degrees, north positive.
  * Time is UTC. Valid for Gregorian dates (accuracy ~0.01° for 1950-2050).
  */
-static int sun_compass(int hour, int minute, int second, int year, int month, int day, float latitude, float longitude) {
+static int sun_compass(
+    int hour, int minute, int second, int year, int month, int day, float latitude, float longitude
+) {
     /* Julian Date (Gregorian calendar) */
     int a = (14 - month) / 12;
     int y = year + 4800 - a;
@@ -203,7 +205,9 @@ static int sun_compass(int hour, int minute, int second, int year, int month, in
  * Inputs: UTC time and Gregorian date; longitude in degrees, east positive;
  *         latitude in degrees, north positive.
  */
-static int moon_compass(int hour, int minute, int second, int year, int month, int day, float latitude, float longitude) {
+static int moon_compass(
+    int hour, int minute, int second, int year, int month, int day, float latitude, float longitude
+) {
     /* 1. Julian Day (UTC) */
     int y = year, m = month;
     if (m <= 2) { y -= 1; m += 12; }
