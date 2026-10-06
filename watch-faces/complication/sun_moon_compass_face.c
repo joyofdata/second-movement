@@ -32,6 +32,7 @@
 #include "filesystem.h"
 #include "sun_moon_compass_face.h"
 
+
 // classic display
 static const char  TL0[] = "C0"; // C0mpass
 static const char  TR0[] = "2L"; // 2un, Luna
@@ -48,6 +49,7 @@ static const uint8_t UPDATE_INTERVAL_T = 60;
 
 static int sun_compass(int, int, int, int, int, int, float, float);
 static int moon_compass(int, int, int, int, int, int, float, float);
+
 
 // Loads coordinates from location.u32 if they are set there. 
 // For setting coordinates to that file use sunrise/sunset face.
@@ -143,7 +145,9 @@ void sun_moon_compass_face_resign(void *context) {
 
 #endif
 
-/*
+
+/* ====================================================================================================================
+ *
  * Where the magic happens ...
  */
 
@@ -265,8 +269,13 @@ static int moon_compass(
     return res % 360;
 }
 
-/*
- * Test / verification via suncalc.org and mooncalc.org
+
+/* ====================================================================================================================
+ *
+ * Tests / verification via suncalc.org and mooncalc.org
+ * 
+ * > cc -std=c11 -Wall -Wextra -Werror -o sun_moon_compass_test sun_moon_compass_test.c -lm
+ * > ./sun_moon_compass_test
  *
  * #define SUN_MOON_COMPASS_TEST
  * #include "sun_moon_compass_face.c"
