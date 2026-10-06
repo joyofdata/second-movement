@@ -26,6 +26,9 @@
 #include <string.h>
 #include <math.h>
 
+// for testing sun_compass and moon_compass using this file
+#ifndef SUN_MOON_COMPASS_TEST
+
 #include "filesystem.h"
 #include "sun_moon_compass_face.h"
 
@@ -38,14 +41,13 @@ static const char  TL1[] = "CPS"; // ComPasS
 static const char  TR1[] = "SL";  // Sun, Luna
 
 // set LAT,LON to NAN if they should be sourced from location.u32
-static const float LAT  = 50.08f;
-static const float LON  = 8.16f;
+static const float LAT  = NAN;
+static const float LON  = NAN;
 
 static const uint8_t UPDATE_INTERVAL_T = 60;
 
 static int sun_compass(int, int, int, int, int, int, float, float);
 static int moon_compass(int, int, int, int, int, int, float, float);
-
 
 // Loads coordinates from location.u32 if they are set there. 
 // For setting coordinates to that file use sunrise/sunset face.
@@ -138,6 +140,8 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
 void sun_moon_compass_face_resign(void *context) {
     (void) context;
 }
+
+#endif
 
 /*
  * Where the magic happens ...
@@ -262,23 +266,46 @@ static int moon_compass(
 }
 
 /*
- * Test Cases (Sun) via suncalc.org:
+ * Test / verification via suncalc.org and mooncalc.org
  *
- * | Lat       | Lon       | Date       | Time  | Azimuth |
- * |-----------|-----------|------------|-------|---------|
- * |  51.61003 |   9.52887 | 2026-10-06 | 06:34 | 109.38  |
- * |   0.86602 |  35.19293 | 2027-05-20 | 11:34 | 305.40  |
- * |  56.75272 |  93.20074 | 2025-09-26 | 15:24 | 266.19  |
- * | -27.05913 | -56.28668 | 2029-02-22 |  6:14 |  83.36  |
- * | -28.61346 | 138.04439 | 2028-11-21 |  2:20 |  20.66  |
+ * #define SUN_MOON_COMPASS_TEST
+ * #include "sun_moon_compass_face.c"
+ * 
+ * #include <stdio.h>
+ * 
+ * int main(void) {
+ *     printf("Sun:  calc / correct:\n");
+ *     //                                         h , i , s, y   , m , d , lat       , lon           360 - Azimuth
+ *     printf("      %3d  / %6.2f\n", sun_compass( 6, 34, 0, 2026, 10,  6,  51.61003f,   9.52887f), (360 - 109.38));
+ *     printf("      %3d  / %6.2f\n", sun_compass(11, 34, 0, 2027,  5, 20,   0.86602f,  35.19293f), (360 - 305.4 ));
+ *     printf("      %3d  / %6.2f\n", sun_compass(15, 24, 0, 2025,  9, 26,  56.75272f,  93.20074f), (360 - 320.95));
+ *     printf("      %3d  / %6.2f\n", sun_compass( 6, 14, 0, 2029,  2, 22, -27.05913f, -56.28668f), (360 - 133.90));
+ *     printf("      %3d  / %6.2f\n", sun_compass( 2, 20, 0, 2028, 11, 21, -28.61346f, 138.04439f), (360 -  20.66));
+ * 
+ *     printf("\nMoon: calc / correct:\n");
+ *     //                                          h , i , s, y   , m , d , lat       , lon           360 - Azimuth
+ *     printf("      %3d  / %6.2f\n", moon_compass( 1, 26, 0, 2026,  6, 27,  51.83575f, -93.98685f), (360 - 146.54));
+ *     printf("      %3d  / %6.2f\n", moon_compass(23, 43, 0, 2027,  1, 11, -29.53527f, -57.60013f), (360 - 272.25));
+ *     printf("      %3d  / %6.2f\n", moon_compass( 3,  9, 0, 2028,  6, 12,  12.78845f,  -5.20113f), (360 - 146.6 ));
+ *     printf("      %3d  / %6.2f\n", moon_compass(23, 48, 0, 2029, 11, 17,  48.73315f,  32.76762f), (360 - 262.69));
+ *     printf("      %3d  / %6.2f\n", moon_compass(14, 31, 0, 2030,  9, 20,  38.46065f, 139.64262f), (360 -  67.67));
+ * 
+ *     return 0;
+ * }
  *
- * Test Cases (Moon) via mooncalc.org:
+ * Result:
  *
- * | Lat       | Lon       | Date       | Time  | Azimuth |
- * |-----------|-----------|------------|-------|---------|
- * |  51.83575 | -93.98685 | 2026-06-26 | 18:26 | 185.47  |
- * | -29.53527 | -57.60013 | 2027-01-11 | 22:43 | 214.32  |
- * |  12.78845 |  -5.20113 | 2028-06-12 | 03:09 | 146.60  |
- * |  48.73315 |  32.76762 | 2029-11-17 | 23:48 | 267.65  |
- * |  38.46065 | 139.64262 | 2030-09-20 | 14:31 |  67.67  |
+ * Sun:  calc / correct:
+ *       250  / 250.62
+ *        55  /  54.60
+ *        39  /  39.05
+ *       226  / 226.10
+ *       339  / 339.34
+ *
+ * Moon: calc / correct:
+ *       213  / 213.46
+ *        88  /  87.75
+ *       213  / 213.40
+ *        97  /  97.31
+ *       292  / 292.33
  */
