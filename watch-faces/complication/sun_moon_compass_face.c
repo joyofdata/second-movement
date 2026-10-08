@@ -58,19 +58,25 @@ static void load_location(sun_moon_compass_state_t *state)
     if(!isnan(LAT) && !isnan(LON)) {
         state->lat = LAT;
         state->lon = LON;
-        state->location_is_set = true;
     } else {
         movement_location_t location = {0};
 
-        if (filesystem_read_file("location.u32", (char *)&location.reg, sizeof(location))
+        // prevents incomplete loading of locations from file
+        if (filesystem_get_file_size("location.u32") == sizeof(location)
+            && filesystem_read_file("location.u32", (char *)&location.reg, sizeof(location))
             && location.reg != 0) {
             state->lat = location.bit.latitude / 100.0f;
             state->lon = location.bit.longitude / 100.0f;
-            state->location_is_set = true;
         } else {
             printf("ERROR: No coords specified.");
-            state->location_is_set = false;
         }
+        state->location_is_set = (
+            !isnan(state->lat) && !isnan(state->lon) &&
+            isfinite(state->lat) &&
+            isfinite(state->lon) &&
+            state->lat >= -90.0f && state->lat <= 90.0f &&
+            state->lon >= -180.0f && state->lon <= 180.0f
+        );
     }
 }
 
