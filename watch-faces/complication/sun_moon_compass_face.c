@@ -134,7 +134,7 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
             watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
 
-            state->ctr = UPDATE_INTERVAL_T-1;
+            state->ctr = 0;
             _update(state);
             _display(state);
             break;
