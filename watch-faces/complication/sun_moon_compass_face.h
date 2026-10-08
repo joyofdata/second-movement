@@ -53,6 +53,7 @@ typedef struct {
     int16_t sun_pos;
     int16_t moon_pos;
     int8_t ctr;
+    bool location_is_set;
 } sun_moon_compass_state_t;
 
 void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr);

@@ -58,6 +58,7 @@ static void load_location(sun_moon_compass_state_t *state)
     if(!isnan(LAT) && !isnan(LON)) {
         state->lat = LAT;
         state->lon = LON;
+        state->location_is_set = true;
     } else {
         movement_location_t location = {0};
 
@@ -65,8 +66,10 @@ static void load_location(sun_moon_compass_state_t *state)
             && location.reg != 0) {
             state->lat = location.bit.latitude / 100.0f;
             state->lon = location.bit.longitude / 100.0f;
+            state->location_is_set = true;
         } else {
             printf("ERROR: No coords specified.");
+            state->location_is_set = false;
         }
     }
 }
@@ -97,7 +100,9 @@ void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr) 
 }
 
 void sun_moon_compass_face_activate(void *context) {
-    (void) context;
+    sun_moon_compass_state_t *state = context;
+
+    load_location(state);
     watch_set_colon();
 }
 
@@ -113,6 +118,16 @@ static void _update(sun_moon_compass_state_t *state) {
 
 bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
     sun_moon_compass_state_t *state = (sun_moon_compass_state_t *)context;
+
+    // check if location could be loaded
+    if (!state->location_is_set) {
+        watch_display_text_with_fallback(WATCH_POSITION_TOP_LEFT, TL1, TL0);
+        watch_display_text_with_fallback(WATCH_POSITION_TOP_RIGHT, TR1, TR0);
+        watch_display_text(WATCH_POSITION_HOURS, "  ");
+        watch_display_text(WATCH_POSITION_MINUTES, "  ");
+        watch_display_text(WATCH_POSITION_SECONDS, "--");
+        return movement_default_loop_handler(event);
+    }
 
     switch (event.event_type) {
         case EVENT_ACTIVATE:
