@@ -97,17 +97,22 @@ static void _display(const sun_moon_compass_state_t *state) {
     }
 }
 
-void sun_moon_compass_face_setup(uint8_t watch_face_index, void ** context_ptr) {
-    (void) watch_face_index;
+void sun_moon_compass_face_setup(uint8_t watch_face_index,
+                                 void **context_ptr) {
+    (void)watch_face_index;
+
     if (*context_ptr == NULL) {
-        *context_ptr = malloc(sizeof(sun_moon_compass_state_t));
-        memset(*context_ptr, 0, sizeof(sun_moon_compass_state_t));
+        sun_moon_compass_state_t *state = malloc(sizeof(*state));
+        if (state == NULL) return;
+
+        *state = (sun_moon_compass_state_t){0};
+        *context_ptr = state;
     }
 }
 
 void sun_moon_compass_face_activate(void *context) {
     sun_moon_compass_state_t *state = context;
-
+    if (state == NULL) return;
     load_location(state);
     watch_set_colon();
 }
@@ -124,6 +129,7 @@ static void _update(sun_moon_compass_state_t *state) {
 
 bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
     sun_moon_compass_state_t *state = (sun_moon_compass_state_t *)context;
+    if (state == NULL) return movement_default_loop_handler(event);
 
     // check if location could be loaded
     if (!state->location_is_set) {
