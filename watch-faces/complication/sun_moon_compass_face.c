@@ -144,6 +144,7 @@ bool sun_moon_compass_face_loop(movement_event_t event, void *context) {
             _display(state);
             break;
         case EVENT_LOW_ENERGY_UPDATE:
+            state->ctr = -1;
             _update(state);
             _display(state);
             break;

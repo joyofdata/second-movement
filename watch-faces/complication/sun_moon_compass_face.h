@@ -42,7 +42,7 @@
  *
  * Positions are recalculated on activation, periodically while active,
  * and on low-energy updates. The seconds field shows the active update
- * countdown, or -1 during low-energy updates.
+ * countdown, or blank during low-energy updates.
  *
  * Set LAT and LON in the source or via sunrise/sunset face for your location.
  */
