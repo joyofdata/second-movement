@@ -47,8 +47,8 @@ static const float LON  = NAN;
 
 static const uint8_t UPDATE_INTERVAL_T = 60;
 
-static int sun_compass(int, int, int, int, int, int, float, float);
-static int moon_compass(int, int, int, int, int, int, float, float);
+static double sun_compass(int, int, int, int, int, int, float, float);
+static double moon_compass(int, int, int, int, int, int, float, float);
 
 
 // Loads coordinates from location.u32 if they are set there. 
@@ -68,16 +68,17 @@ static void load_location(sun_moon_compass_state_t *state)
             state->lat = location.bit.latitude / 100.0f;
             state->lon = location.bit.longitude / 100.0f;
         } else {
-            printf("ERROR: No coords specified.");
+            printf("ERROR: No coords specified.\n");
         }
         state->location_is_set = (
             !isnan(state->lat) && !isnan(state->lon) &&
-            isfinite(state->lat) &&
-            isfinite(state->lon) &&
+            isfinite(state->lat) && isfinite(state->lon) &&
+            (state->lat != 0.0f || state->lon != 0.0f) &&
             state->lat >= -90.0f && state->lat <= 90.0f &&
             state->lon >= -180.0f && state->lon <= 180.0f
         );
     }
+    printf("INFO: lat = %6.2f, lon = %6.2f\n", state->lat, state->lon);
 }
 
 static void _display(const sun_moon_compass_state_t *state) {
@@ -121,9 +122,9 @@ static void _update(sun_moon_compass_state_t *state) {
     watch_date_time_t now = movement_get_utc_date_time();
     int year = now.unit.year + WATCH_RTC_REFERENCE_YEAR;
 
-    state->sun_pos = sun_compass(now.unit.hour, now.unit.minute, now.unit.second, 
+    state->sun_pos = (float) sun_compass(now.unit.hour, now.unit.minute, now.unit.second, 
         year, now.unit.month, now.unit.day, state->lat, state->lon);
-    state->moon_pos = moon_compass(now.unit.hour, now.unit.minute, now.unit.second, 
+    state->moon_pos = (float) moon_compass(now.unit.hour, now.unit.minute, now.unit.second, 
         year, now.unit.month, now.unit.day, state->lat, state->lon);
 }
 
@@ -199,7 +200,7 @@ static double cosd(double d) { return cos(d * DEG2RAD); }
  * longitude: degrees, east positive. latitude: degrees, north positive.
  * Time is UTC. Valid for Gregorian dates (accuracy ~0.01° for 1950-2050).
  */
-static int sun_compass(
+static double sun_compass(
     int hour, int minute, int second, int year, int month, int day, float latitude, float longitude
 ) {
     /* Julian Date (Gregorian calendar) */
@@ -231,9 +232,7 @@ static int sun_compass(
     az = norm360(az * RAD2DEG + 180.0);
 
     /* Sun is at 0 on the circle; North is at -az (clockwise) */
-    double north = norm360(-az);
-    int result = (int)floor(north + 0.5);
-    return result % 360;
+    return norm360(-az);
 }
 
 /*
@@ -241,7 +240,7 @@ static int sun_compass(
  * Inputs: UTC time and Gregorian date; longitude in degrees, east positive;
  *         latitude in degrees, north positive.
  */
-static int moon_compass(
+static double moon_compass(
     int hour, int minute, int second, int year, int month, int day, float latitude, float longitude
 ) {
     /* 1. Julian Day (UTC) */
@@ -293,8 +292,7 @@ static int moon_compass(
                               sin(dct) * cos(phi) - cos(dct) * cos(Ht) * sin(phi)) * RAD2DEG);
 
     /* 7. North relative to the Moon */
-    int res = (int)floor(norm360(360.0 - az) + 0.5);
-    return res % 360;
+    return norm360(360.0 - az);
 }
 
 

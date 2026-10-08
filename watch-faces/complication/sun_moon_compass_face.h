@@ -50,8 +50,8 @@
 typedef struct {
     float lat;
     float lon;
-    int16_t sun_pos;
-    int16_t moon_pos;
+    float sun_pos;
+    float moon_pos;
     int8_t ctr;
     bool location_is_set;
 } sun_moon_compass_state_t;
