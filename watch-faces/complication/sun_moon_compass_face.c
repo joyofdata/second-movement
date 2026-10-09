@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 // for testing sun_compass and moon_compass using this file
 #ifndef SUN_MOON_COMPASS_TEST
@@ -300,7 +301,7 @@ static double moon_compass(
  *
  * Tests / verification via suncalc.org and mooncalc.org
  * 
- * > cc -std=c11 -Wall -Wextra -Werror -o sun_moon_compass_test sun_moon_compass_test.c -lm
+ * > cc -std=c11 -Wall -Wextra -Werror -o test_sun_moon_compass test_sun_moon_compass.c -lm
  * > ./sun_moon_compass_test
  *
  * #define SUN_MOON_COMPASS_TEST
@@ -309,21 +310,21 @@ static double moon_compass(
  * #include <stdio.h>
  * 
  * int main(void) {
- *     printf("Sun:  calc / correct:\n");
- *     //                                         h , i , s, y   , m , d , lat       , lon           360 - Azimuth
- *     printf("      %3d  / %6.2f\n", sun_compass( 6, 34, 0, 2026, 10,  6,  51.61003f,   9.52887f), (360 - 109.38));
- *     printf("      %3d  / %6.2f\n", sun_compass(11, 34, 0, 2027,  5, 20,   0.86602f,  35.19293f), (360 - 305.4 ));
- *     printf("      %3d  / %6.2f\n", sun_compass(15, 24, 0, 2025,  9, 26,  56.75272f,  93.20074f), (360 - 320.95));
- *     printf("      %3d  / %6.2f\n", sun_compass( 6, 14, 0, 2029,  2, 22, -27.05913f, -56.28668f), (360 - 133.90));
- *     printf("      %3d  / %6.2f\n", sun_compass( 2, 20, 0, 2028, 11, 21, -28.61346f, 138.04439f), (360 -  20.66));
+ *     printf("Sun:  calc    / correct:\n");
+ *     //                                            h , i , s, y   , m , d , lat       , lon           360 - Azimuth
+ *     printf("      %6.2f  / %6.2f\n", sun_compass( 6, 34, 0, 2026, 10,  6,  51.61003f,   9.52887f), (360 - 109.38));
+ *     printf("      %6.2f  / %6.2f\n", sun_compass(11, 34, 0, 2027,  5, 20,   0.86602f,  35.19293f), (360 - 305.4 ));
+ *     printf("      %6.2f  / %6.2f\n", sun_compass(15, 24, 0, 2025,  9, 26,  56.75272f,  93.20074f), (360 - 320.95));
+ *     printf("      %6.2f  / %6.2f\n", sun_compass( 6, 14, 0, 2029,  2, 22, -27.05913f, -56.28668f), (360 - 133.90));
+ *     printf("      %6.2f  / %6.2f\n", sun_compass( 2, 20, 0, 2028, 11, 21, -28.61346f, 138.04439f), (360 -  20.66));
  * 
- *     printf("\nMoon: calc / correct:\n");
- *     //                                          h , i , s, y   , m , d , lat       , lon           360 - Azimuth
- *     printf("      %3d  / %6.2f\n", moon_compass( 1, 26, 0, 2026,  6, 27,  51.83575f, -93.98685f), (360 - 146.54));
- *     printf("      %3d  / %6.2f\n", moon_compass(23, 43, 0, 2027,  1, 11, -29.53527f, -57.60013f), (360 - 272.25));
- *     printf("      %3d  / %6.2f\n", moon_compass( 3,  9, 0, 2028,  6, 12,  12.78845f,  -5.20113f), (360 - 146.6 ));
- *     printf("      %3d  / %6.2f\n", moon_compass(23, 48, 0, 2029, 11, 17,  48.73315f,  32.76762f), (360 - 262.69));
- *     printf("      %3d  / %6.2f\n", moon_compass(14, 31, 0, 2030,  9, 20,  38.46065f, 139.64262f), (360 -  67.67));
+ *     printf("\nMoon: calc    / correct:\n");
+ *     //                                             h , i , s, y   , m , d , lat       , lon           360 - Azimuth
+ *     printf("      %6.2f  / %6.2f\n", moon_compass( 1, 26, 0, 2026,  6, 27,  51.83575f, -93.98685f), (360 - 146.54));
+ *     printf("      %6.2f  / %6.2f\n", moon_compass(23, 43, 0, 2027,  1, 11, -29.53527f, -57.60013f), (360 - 272.25));
+ *     printf("      %6.2f  / %6.2f\n", moon_compass( 3,  9, 0, 2028,  6, 12,  12.78845f,  -5.20113f), (360 - 146.6 ));
+ *     printf("      %6.2f  / %6.2f\n", moon_compass(23, 48, 0, 2029, 11, 17,  48.73315f,  32.76762f), (360 - 262.69));
+ *     printf("      %6.2f  / %6.2f\n", moon_compass(14, 31, 0, 2030,  9, 20,  38.46065f, 139.64262f), (360 -  67.67));
  * 
  *     return 0;
  * }
